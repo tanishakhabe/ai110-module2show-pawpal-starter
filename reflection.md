@@ -7,6 +7,8 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+My initial UML design will have three classes, user, pet, task. The three core actions a user should be able to perform are add a pet, check off tasks for pets, and see their daily task list. For pet class, you should be able to see basic information about the pet like their required tasks and other info. The tasks class allows you to create individual tasks and input information like for which associated pet, duration, etc. 
+
 **b. Design changes**
 
 - Did your design change during implementation?
