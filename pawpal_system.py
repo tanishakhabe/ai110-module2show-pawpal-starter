@@ -8,7 +8,7 @@ class Task:
     category: str          # e.g. "walk", "feeding", "meds", "grooming"
     duration_minutes: int
     priority: int          # 1 = highest priority
-    pet_name: str          # name of the associated pet
+    pet_name: Pet          # name of the associated pet
     completed: bool = False
 
     def mark_complete(self):
@@ -38,9 +38,6 @@ class Owner:
     pets: list[Pet] = field(default_factory=list)
 
     def add_pet(self, pet: Pet):
-        pass
-
-    def get_daily_plan(self) -> list[Task]:
         pass
 
 

@@ -7,12 +7,14 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
-My initial UML design will have three classes, user, pet, task. The three core actions a user should be able to perform are add a pet, check off tasks for pets, and see their daily task list. For pet class, you should be able to see basic information about the pet like their required tasks and other info. The tasks class allows you to create individual tasks and input information like for which associated pet, duration, etc. 
+My initial UML design will have four classes, user, pet, task, and scheduler. The three core actions a user should be able to perform are add a pet, check off tasks for pets, and see their daily task list. For pet class, you should be able to see basic information about the pet like their species and required tasks. You should also be able to add and delete pets. The tasks class allows you to create individual tasks and input information such as for which associated pet, duration of the task, etc. The scheduler class compiles a daily task list for users based on their availability and the duration and priority of different tasks. 
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+Yes, my designed changed during actual implementation of the classes. For example, I realized that my original design had no link between Task.pet_name to the actual Pet object. Another problem in my original design was that the .get_daily_plan() method existed in two places, the User and Scheduler class. I used Claude Code, which suggested to remove Owner.get_daily_plan() and just use the Scheduler class to remove duplication and make sure that all scheduling logic was happening under one class only. 
 
 ---
 
