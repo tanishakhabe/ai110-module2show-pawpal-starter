@@ -1,4 +1,5 @@
 import streamlit as st
+import pawpal_system
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -40,6 +41,7 @@ st.divider()
 
 st.subheader("Quick Demo Inputs (UI only)")
 owner_name = st.text_input("Owner name", value="Jordan")
+available_minutes = st.number_input("Available minutes today", min_value=10, max_value=600, value=60)
 pet_name = st.text_input("Pet name", value="Mochi")
 species = st.selectbox("Species", ["dog", "cat", "other"])
 
@@ -48,6 +50,24 @@ st.caption("Add a few tasks. In your final version, these should feed into your 
 
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
+
+if "owner" not in st.session_state:
+    st.session_state.owner = pawpal_system.Owner(name=owner_name, available_minutes=int(available_minutes))
+
+owner = st.session_state.owner
+owner.name = owner_name
+owner.available_minutes = int(available_minutes)
+
+
+def get_or_create_pet(owner_obj: pawpal_system.Owner, name: str, species_name: str) -> pawpal_system.Pet:
+    """Return an existing pet by name or create and add it to the owner."""
+    for existing_pet in owner_obj.pets:
+        if existing_pet.name == name:
+            return existing_pet
+
+    new_pet = pawpal_system.Pet(name=name, species=species_name, breed="Unknown", age=1)
+    owner_obj.add_pet(new_pet)
+    return new_pet
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -58,9 +78,29 @@ with col3:
     priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
 
 if st.button("Add task"):
-    st.session_state.tasks.append(
-        {"title": task_title, "duration_minutes": int(duration), "priority": priority}
+    priority_map = {"high": 1, "medium": 2, "low": 3}
+    pet = get_or_create_pet(owner, pet_name, species)
+    task = pawpal_system.Task(
+        name=task_title,
+        category="general",
+        duration_minutes=int(duration),
+        daily_frequency=1,
+        priority=priority_map[priority],
+        pet_name=pet.name,
     )
+    pet.add_task(task)
+
+    st.session_state.tasks = [
+        {
+            "pet": t.pet_name,
+            "title": t.name,
+            "duration_minutes": t.duration_minutes,
+            "priority": t.priority,
+            "completed": t.completed,
+        }
+        for p in owner.pets
+        for t in p.tasks
+    ]
 
 if st.session_state.tasks:
     st.write("Current tasks:")
@@ -71,18 +111,14 @@ else:
 st.divider()
 
 st.subheader("Build Schedule")
-st.caption("This button should call your scheduling logic once you implement it.")
+st.caption("Generate a schedule using your backend scheduling logic.")
 
 if st.button("Generate schedule"):
-    st.warning(
-        "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
-    )
-    st.markdown(
-        """
-Suggested approach:
-1. Design your UML (draft).
-2. Create class stubs (no logic).
-3. Implement scheduling behavior.
-4. Connect your scheduler here and display results.
-"""
-    )
+    scheduler = pawpal_system.Scheduler(owner)
+    scheduled_tasks = scheduler.generate_plan()
+
+    if scheduled_tasks:
+        st.success("Schedule generated.")
+        st.text(scheduler.explain_plan())
+    else:
+        st.info("No tasks fit into the current time window. Add tasks or increase available minutes.")
