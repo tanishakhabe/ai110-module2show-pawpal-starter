@@ -30,6 +30,10 @@ Yes, my designed changed during actual implementation of the classes. For exampl
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+One key trade-off is that it optimizes for priority first, not timeline coherence: higher-priority tasks are selected before lower-priority ones, even if that creates an awkward time order (for example, an 08:30 task can be scheduled before a 06:45 task). I think this makes sense for the app because we want to prioritize high priority tasks for different pets so things can be scheduled and completed more efficiently. 
+
+
+
 ---
 
 ## 3. AI Collaboration
