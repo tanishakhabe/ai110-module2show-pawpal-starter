@@ -44,3 +44,46 @@ pip install -r requirements.txt
 
 ### Smarter Scheduling
 This app now has smarter task scheduling features so you can complete more tasks more efficiently, and set up daily and weekly schedules. The scheduling feature basically gathers all pet-care tasks, prioritizes them, and builds a daily plan that fits within the user's available minutes while also supporting sorting by task duration. It also handles recurring tasks by creating the next daily or weekly instance after completion and can report overlapping task-time conflicts as warnings. 
+
+### Testing PawPal
+Use the command python -m pytest to run the test cases. My tests cover: 
+Exact time-budget boundary inclusion
+Just-over-budget rejection by 1 minute
+Priority-time mismatch behavior
+Stable ordering on tie priority
+HH:MM parsing edge cases (00:00, 23:59, single-digit, 24:00, 9:75)
+Sorting correctness (chronological order)
+Recurrence logic for daily completion
+Conflict detection for duplicate times
+
+I am 5 star confident in the system reliability because it passed all of the test cases. 
+
+
+### Features: 
+Priority-Based Scheduling
+Builds a daily plan by sorting all pet tasks by priority and selecting tasks that fit within the owner’s available time budget.
+
+Time-Aware Task Sorting
+Sorts tasks in chronological order using HH:MM parsing with numeric hour/minute comparison.
+
+Conflict Detection Across Tasks
+Detects overlapping start times and identifies all conflicting task pairs, including conflicts within one pet’s tasks and across different pets.
+
+Non-Fatal Conflict Warnings
+Converts detected conflicts into warning messages so scheduling can continue without crashing.
+
+Recurring Task Automation
+When a daily or weekly task is marked complete, automatically creates the next occurrence with the due date shifted by +1 day or +7 days.
+
+Time-Budget Constraint Enforcement
+Prevents over-scheduling by skipping tasks that would exceed the owner’s available minutes.
+
+Human-Readable Plan Explanation
+Generates a clear textual summary of scheduled tasks, including priority, time, pet, task name, and total scheduled minutes.
+
+
+### Demo: 
+### Demo:
+<a href="final_app.png" target="_blank">
+  <img src="final_app.png" alt="PawPal App" width="700" />
+</a>

@@ -69,13 +69,15 @@ def get_or_create_pet(owner_obj: pawpal_system.Owner, name: str, species_name: s
     owner_obj.add_pet(new_pet)
     return new_pet
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     task_title = st.text_input("Task title", value="Morning walk")
 with col2:
     duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
 with col3:
     priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
+with col4:
+    task_time = st.text_input("Start time (HH:MM)", value="08:00")
 
 if st.button("Add task"):
     priority_map = {"high": 1, "medium": 2, "low": 3}
@@ -87,6 +89,7 @@ if st.button("Add task"):
         daily_frequency=1,
         priority=priority_map[priority],
         pet_name=pet.name,
+        time=task_time,
     )
     pet.add_task(task)
 
@@ -94,6 +97,7 @@ if st.button("Add task"):
         {
             "pet": t.pet_name,
             "title": t.name,
+            "time": t.time,
             "duration_minutes": t.duration_minutes,
             "priority": t.priority,
             "completed": t.completed,
@@ -103,8 +107,47 @@ if st.button("Add task"):
     ]
 
 if st.session_state.tasks:
-    st.write("Current tasks:")
-    st.table(st.session_state.tasks)
+    scheduler = pawpal_system.Scheduler(owner)
+    all_tasks = [t for p in owner.pets for t in p.tasks]
+
+    st.success("Tasks loaded. Review both priority and time views below.")
+    col_priority, col_time = st.columns(2)
+
+    with col_priority:
+        st.markdown("**Filtered by Priority**")
+        st.table(
+            [
+                {
+                    "pet": t.pet_name,
+                    "title": t.name,
+                    "priority": t.priority,
+                    "time": t.time,
+                    "duration_minutes": t.duration_minutes,
+                }
+                for t in scheduler.filter_by_priority()
+            ]
+        )
+
+    with col_time:
+        st.markdown("**Sorted by Time**")
+        st.table(
+            [
+                {
+                    "pet": t.pet_name,
+                    "title": t.name,
+                    "time": t.time,
+                    "priority": t.priority,
+                    "duration_minutes": t.duration_minutes,
+                    "completed": t.completed,
+                }
+                for t in scheduler.sort_by_time(all_tasks)
+            ]
+        )
+
+    warnings = scheduler.get_conflict_warnings(all_tasks)
+    if warnings:
+        for warning in warnings:
+            st.warning(warning)
 else:
     st.info("No tasks yet. Add one above.")
 
@@ -115,10 +158,41 @@ st.caption("Generate a schedule using your backend scheduling logic.")
 
 if st.button("Generate schedule"):
     scheduler = pawpal_system.Scheduler(owner)
-    scheduled_tasks = scheduler.generate_plan()
+    scheduled_tasks, warnings = scheduler.generate_plan_with_warnings()
 
     if scheduled_tasks:
         st.success("Schedule generated.")
         st.text(scheduler.explain_plan())
+        st.markdown("**Scheduled Tasks (Priority Order)**")
+        st.table(
+            [
+                {
+                    "pet": t.pet_name,
+                    "title": t.name,
+                    "priority": t.priority,
+                    "time": t.time,
+                    "duration_minutes": t.duration_minutes,
+                }
+                for t in scheduled_tasks
+            ]
+        )
+
+        st.markdown("**Scheduled Tasks (Chronological Order)**")
+        st.table(
+            [
+                {
+                    "pet": t.pet_name,
+                    "title": t.name,
+                    "time": t.time,
+                    "priority": t.priority,
+                    "duration_minutes": t.duration_minutes,
+                }
+                for t in scheduler.sort_by_time(scheduled_tasks)
+            ]
+        )
+        if warnings:
+            st.warning("Potential scheduling conflicts detected:")
+            for warning in warnings:
+                st.warning(warning)
     else:
         st.info("No tasks fit into the current time window. Add tasks or increase available minutes.")
